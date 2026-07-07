@@ -11,7 +11,7 @@ class DailyLogBase(BaseModel):
     mood: int = 5
 
 class DailyLogCreate(DailyLogBase):
-    date: Optional[date] = None
+    date: Optional[str] = None  # Changed to str to accept frontend input easily
 
 class DailyLogResponse(DailyLogBase):
     id: int

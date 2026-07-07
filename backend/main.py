@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -18,15 +19,21 @@ app.add_middleware(
 
 @app.post("/logs/", response_model=schemas.DailyLogResponse)
 def create_or_update_log(log: schemas.DailyLogCreate, db: Session = Depends(database.get_db)):
-    target_date = log.date or date.today()
+    # Default to today
+    target_date = date.today()
+    
+    # If a date string was provided, parse it
+    if log.date:
+        target_date = datetime.strptime(log.date, "%Y-%m-%d").date()
+
     db_log = db.query(models.DailyLog).filter(models.DailyLog.date == target_date).first()
     
     if db_log:
-        # Use model_dump for Pydantic V2
-        for key, value in log.model_dump(exclude_unset=True).items():
+        for key, value in log.model_dump(exclude_unset=True, exclude={'date'}).items():
             setattr(db_log, key, value)
     else:
-        db_log = models.DailyLog(**log.model_dump())
+        db_log = models.DailyLog(**log.model_dump(exclude={'date'}))
+        db_log.date = target_date
         db.add(db_log)
         
     db.commit()
