@@ -18,3 +18,11 @@ export interface DailyLogCreate {
   work_hours: number;
   mood: number;
 }
+
+export interface HealthStats {
+  avg_mood: number;
+  avg_sleep: number;
+  avg_water: number;
+  total_logs: number;
+  insight: string;
+}

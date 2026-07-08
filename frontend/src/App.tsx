@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { fetchLogs, saveLog } from './api';
-import type { DailyLog, DailyLogCreate } from './types';
+import { fetchLogs, saveLog, fetchStats } from './api';
+import type { DailyLog, DailyLogCreate, HealthStats } from './types';
 import './App.css';
 
 function App() {
   const [logs, setLogs] = useState<DailyLog[]>([]);
+  const [stats, setStats] = useState<HealthStats | null>(null);
   const [form, setForm] = useState<DailyLogCreate>({
     date: new Date().toISOString().split('T')[0],
     water_liters: 0,
@@ -16,15 +17,16 @@ function App() {
   });
 
   useEffect(() => {
-    loadLogs();
+    loadData();
   }, []);
 
-  const loadLogs = async () => {
+  const loadData = async () => {
     try {
-      const data = await fetchLogs();
-      setLogs(data);
+      const [logsData, statsData] = await Promise.all([fetchLogs(), fetchStats()]);
+      setLogs(logsData);
+      setStats(statsData);
     } catch (error) {
-      console.error('Failed to load logs:', error);
+      console.error('Failed to load data:', error);
     }
   };
 
@@ -32,8 +34,9 @@ function App() {
     e.preventDefault();
     try {
       await saveLog(form);
-      await loadLogs();
+      await loadData();
       setForm({
+        date: new Date().toISOString().split('T')[0],
         water_liters: 0,
         meals_count: 0,
         sugar_grams: 0,
@@ -70,6 +73,37 @@ function App() {
       </header>
 
       <main className="main">
+        {/* --- NEW STATS SECTION --- */}
+        {stats && stats.total_logs > 0 && (
+          <section className="card stats-card">
+            <div className="card-header">
+              <h2>Health Insights</h2>
+              <p className="card-description">Based on your {stats.total_logs} logged days</p>
+            </div>
+            
+            <div className="stats-grid">
+              <div className="stat-box">
+                <span className="stat-label">Avg Mood</span>
+                <span className="stat-value">{stats.avg_mood}<span className="stat-unit">/10</span></span>
+              </div>
+              <div className="stat-box">
+                <span className="stat-label">Avg Sleep</span>
+                <span className="stat-value">{stats.avg_sleep}<span className="stat-unit">hrs</span></span>
+              </div>
+              <div className="stat-box">
+                <span className="stat-label">Avg Water</span>
+                <span className="stat-value">{stats.avg_water}<span className="stat-unit">L</span></span>
+              </div>
+            </div>
+
+            <div className="insight-box">
+              <h3>Correlation Insight</h3>
+              <p>{stats.insight}</p>
+            </div>
+          </section>
+        )}
+        {/* --- END NEW STATS SECTION --- */}
+
         <section className="card form-card">
           <div className="card-header">
             <h2>Daily Log Entry</h2>
@@ -78,15 +112,15 @@ function App() {
           
           <form onSubmit={handleSubmit} className="form">
             <div className="form-group full-width">
-            <label htmlFor="date">Date</label>
-            <input
-              id="date"
-              type="date"
-              max={new Date().toISOString().split('T')[0]} // Can't select future dates
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-            />
-          </div>
+              <label htmlFor="date">Date</label>
+              <input
+                id="date"
+                type="date"
+                max={new Date().toISOString().split('T')[0]}
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+              />
+            </div>
             <div className="form-grid">
               <div className="form-group">
                 <label htmlFor="water">Water Intake</label>
