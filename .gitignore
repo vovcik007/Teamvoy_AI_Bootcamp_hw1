@@ -222,3 +222,5 @@ node_modules/
 dist/
 .env.local
 .env.*.local
+
+.db

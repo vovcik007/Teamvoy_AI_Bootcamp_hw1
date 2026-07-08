@@ -18,3 +18,12 @@ class DailyLogResponse(DailyLogBase):
     date: date
 
     model_config = ConfigDict(from_attributes=True)
+
+class HealthStats(BaseModel):
+    avg_mood: float
+    avg_sleep: float
+    avg_water: float
+    total_logs: int
+    insight: str
+
+    model_config = ConfigDict(from_attributes=True)
