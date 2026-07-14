@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GitHub Repository Analysis",
+  "description": "Structured analysis output from GitHub Repository Analyzer",
+  "type": "object",
+  "required": ["summary", "technologies", "strengths", "issues", "recommendations"],
+  "properties": {
+    "summary": {
+      "type": "string",
+      "description": "2-3 sentence overview of the project",
+      "maxLength": 300
+    },
+    "technologies": {
+      "type": "array",
+      "description": "List of detected technologies and frameworks",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "strengths": {
+      "type": "array",
+      "description": "Positive aspects of the codebase",
+      "items": {
+        "type": "string"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "description": "Potential problems or concerns",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "description": "Specific actionable improvements",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
